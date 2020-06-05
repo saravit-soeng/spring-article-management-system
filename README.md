@@ -39,7 +39,7 @@ Before getting into the tutorial, please make sure you have the following requir
 
 ## Project Structure
 
-Suppose that you have the package _com.example.ams_ under _src/main_ folder in your project structure, then create sub-packages under the package _com.example.ams_ :
+Suppose you have the package _com.example.ams_ under _src/main_ folder in your project structure, then create sub-packages under the package _com.example.ams_ :
 - configuration
 - model
 - repository
