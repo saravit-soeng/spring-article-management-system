@@ -7,7 +7,7 @@ Before getting into the tutorial, please make sure you have the following requir
 - IDE: IntelliJ or Spring Tool Suite (This tutorial using IntelliJ)
 - Database: PostgreSQL on local or Server (Backup the database file that is located in folder _src/main/resources/database_)
 
-## Create Sring Boot Project
+## Create Spring Boot Project
 - Open IntelliJ IDE and you will see screen as below, after that choose __Create New Project__
 
 <p align="center">
@@ -39,11 +39,41 @@ Before getting into the tutorial, please make sure you have the following requir
 
 ## Project Structure
 
-Suppose you have the package _com.example.ams_ under _src/main_ folder in your project structure, then create sub-packages under the package _com.example.ams_ :
+Suppose you have the _com.example.ams_ package under _src/main/java_ folder in your project structure, then create sub-packages under the package _com.example.ams_ (Right click on _com.example.ams_ -> New -> Package):
 - configuration
 - model
 - repository
 - service
 - controller
 
+## Maven Dependencies
+
+Before proceed further, you have to add some dependencies under __dependencies__ section in _pom.xml_ file:
+- postgresql: Driver for connection to PostgreSQL DB
+- mybatis: Object relational mapping (ORM)
+- nekohtml & spring-boot-devtools (optional)
+
+```xml
+<dependency>
+    <groupId>org.postgresql</groupId>
+    <artifactId>postgresql</artifactId>
+    <scope>runtime</scope>
+</dependency>
+<dependency>
+    <groupId>org.mybatis.spring.boot</groupId>
+    <artifactId>mybatis-spring-boot-starter</artifactId>
+    <version>1.3.2</version>
+</dependency>
+<dependency>
+    <groupId>net.sourceforge.nekohtml</groupId>
+    <artifactId>nekohtml</artifactId>
+</dependency>
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-devtools</artifactId>
+    <optional>true</optional>
+</dependency>
+```
+
+You can find other maven dependencies in this website ==> https://mvnrepository.com/
 
