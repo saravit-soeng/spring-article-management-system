@@ -1,5 +1,5 @@
 # Article Management System Tutorial
-Spring Framework - AMS API and Application 
+Spring Framework - Article Management System (AMS) API and Application 
 
 ## Prerequisite
 Before getting into the tutorial, please make sure you have the following requirements on your computer:
@@ -46,7 +46,7 @@ Suppose you have the _com.example.ams_ package under _src/main/java_ folder in y
 - service
 - controller
 
-## Adding Maven Dependencies
+## Add Maven Dependencies
 
 Before proceed further, you have to add some dependencies under __dependencies__ section in _pom.xml_ file:
 - postgresql: Driver for connection to PostgreSQL DB
@@ -252,4 +252,325 @@ public class Article {
     }
 }
 ```
+- __Pagination__
+```java
+package com.example.ams.model;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+public class Pagination {
+    private int page;
+    private int limit;
+    @JsonProperty("total_page")
+    private int totalPage;
+    @JsonProperty("total_record")
+    private int totalRecord;
+
+    public int getPage() {
+        return page;
+    }
+
+    public void setPage(int page) {
+        this.page = page;
+    }
+
+    public int getLimit() {
+        return limit;
+    }
+
+    public void setLimit(int limit) {
+        this.limit = limit;
+    }
+
+    public int getTotalPage() {
+        return totalPage;
+    }
+
+    public void setTotalPage(int totalPage) {
+        this.totalPage = totalPage;
+    }
+
+    public int getTotalRecord() {
+        return totalRecord;
+    }
+
+    public void setTotalRecord(int totalRecord) {
+        this.totalRecord = totalRecord;
+    }
+}
+```
+
+## Create RESTful API for AMS
+
+- __Category REST Endpoint__
+
+Under __repository__ package -> create new java class -> interface type -> name it "CategoryRepo"
+
+```java
+package com.example.ams.repository;
+
+import com.example.ams.model.Category;
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface CategoryRepo {
+
+    @Select("SELECT * FROM category ORDER BY id")
+    List<Category> getAllCategories();
+
+    @Insert("INSERT INTO category(name) VALUES(#{name})")
+    Boolean addCategory(Category category);
+
+    @Update("UPDATE category set name=#{name} WHERE id=#{id}")
+    Boolean updateCategory(Category category);
+}
+```
+
+After created the repository, now created category service. Under __service__ package -> Create new java class -> interface type -> "CategoryService"
+
+```java
+package com.example.ams.service;
+
+import com.example.ams.model.Category;
+import java.util.List;
+
+public interface CategoryService {
+    List<Category> getAllCategories();
+    Boolean addCategory(Category category);
+    Boolean updateCategory(Category category);
+}
+```
+Now you need to implement the CategoryService to provide business logic, under service package -> create a new package -> name it "impl". Then, under __impl__ package -> Create new java class -> "CategoryServiceImpl"
+
+```java
+package com.example.ams.service.impl;
+
+import com.example.ams.model.Category;
+import com.example.ams.repository.CategoryRepo;
+import com.example.ams.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class CategoryServiceImpl implements CategoryService {
+
+    @Autowired
+    private CategoryRepo categoryRepo;
+
+    @Override
+    public List<Category> getAllCategories() {
+        return categoryRepo.getAllCategories();
+    }
+
+    @Override
+    public Boolean addCategory(Category category) {
+        return categoryRepo.addCategory(category);
+    }
+
+    @Override
+    public Boolean updateCategory(Category category) {
+        return categoryRepo.updateCategory(category);
+    }
+}
+```
+
+Last step is to create Controller. Now, under __controller__ package -> Create new package -> name the package to "restapi".
+
+Under __restapi__ package -> Create new java class -> "CategoryController"
+
+```java
+package com.example.ams.controller.restapi;
+
+import com.example.ams.model.Category;
+import com.example.ams.service.CategoryService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class CategoryController {
+
+    @Autowired
+    private CategoryService categoryService;
+
+    @GetMapping("/category")
+    public ResponseEntity<Map<String,Object>> getAllCategories(){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            List<Category> categories = categoryService.getAllCategories();
+            map.put("message", "success");
+            map.put("status", true);
+            map.put("data", categories);
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @PostMapping("/category")
+    public ResponseEntity<Map<String,Object>> addCategory(@RequestBody Category category){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean isAdded = categoryService.addCategory(category);
+            if(isAdded){
+                map.put("message", "success");
+                map.put("status", true);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @PutMapping("/category")
+    public ResponseEntity<Map<String,Object>> updateCategory(@RequestBody Category category){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean isUpdated = categoryService.updateCategory(category);
+            if(isUpdated){
+                map.put("message", "success");
+                map.put("status", true);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+}
+```
+
+==> Now you have created Category REST API Endpoint. 🙂
+
+- __Article REST Endpoint__
+
+Steps and Flow are the same as Category endpoint, now let's create Article Endpoint:
+
+Under __repository__ -> create ArticleRepo
+
+```java
+package com.example.ams.repository;
+
+import com.example.ams.model.Article;
+import com.example.ams.model.schema.AddedArticle;
+import com.example.ams.model.schema.UpdatedArticle;
+import org.apache.ibatis.annotations.*;
+import org.springframework.stereotype.Repository;
+import java.util.List;
+
+@Repository
+public interface ArticleRepo {
+
+    @Insert("INSERT INTO article(title, description, thumbnail, category_id, author) VALUES(#{title},#{description},#{thumbnail}, #{category_id}, #{author})")
+    Boolean addArticle(AddedArticle article);
+
+    @Update("UPDATE article SET title=#{title}, description=#{description}, thumbnail=#{thumbnail}, category_id=#{category_id}, author=#{author} WHERE id=#{id}")
+    Boolean updateArticle(UpdatedArticle article);
+
+    @Delete("DELETE FROM article WHERE id=#{id}")
+    Boolean deleteArticle(int id);
+
+    @Select("select " +
+            "a.id, a.title, a.description, a.thumbnail, a.author, a.created_date, a.category_id, c.name as category_name " +
+            "from article a inner join category c on a.category_id = c.id order by a.id desc limit #{limit} offset #{offset}")
+    @Results(value = {
+            @Result(property = "id", column = "id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "description", column = "description"),
+            @Result(property = "thumbnail", column = "thumbnail"),
+            @Result(property = "author", column = "author"),
+            @Result(property = "category.id", column = "category_id"),
+            @Result(property = "category.name", column = "category_name"),
+            @Result(property = "createdDate", column = "created_date")
+    })
+    List<Article> getAllArticles(@Param("offset") int offset, @Param("limit") int limit);
+
+    @Select("select count(*) from article")
+    int countAllArticles();
+
+    @Select("select " +
+            "a.id, a.title, a.description, a.thumbnail, a.author, a.created_date, a.category_id, c.name as category_name " +
+            "from article a inner join category c on a.category_id = c.id where a.id=#{id}")
+    @Results(value = {
+            @Result(property = "id", column = "id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "description", column = "description"),
+            @Result(property = "thumbnail", column = "thumbnail"),
+            @Result(property = "author", column = "author"),
+            @Result(property = "category.id", column = "category_id"),
+            @Result(property = "category.name", column = "category_name"),
+            @Result(property = "createdDate", column = "created_date")
+    })
+    Article getArticleByID(int id);
+
+    @Select("select " +
+            "a.id, a.title, a.description, a.thumbnail, a.author, a.created_date, a.category_id, c.name as category_name " +
+            "from article a inner join category c on a.category_id = c.id where a.category_id=#{category_id} order by a.id desc limit #{limit} offset #{offset}")
+    @Results(value = {
+            @Result(property = "id", column = "id"),
+            @Result(property = "title", column = "title"),
+            @Result(property = "description", column = "description"),
+            @Result(property = "thumbnail", column = "thumbnail"),
+            @Result(property = "author", column = "author"),
+            @Result(property = "category.id", column = "category_id"),
+            @Result(property = "category.name", column = "category_name"),
+            @Result(property = "createdDate", column = "created_date")
+    })
+    List<Article> getArticlesByCategory(@Param("category_id") int categoryID, @Param("offset") int offset, @Param("limit") int limit);
+
+    @Select("select count(*) from article where category_id=#{category_id}")
+    int countArticleByCategory(@Param("category_id") int categoryID);
+}
+```
+
+Under __service__ -> create ArticleService interface
+
+```java
+package com.example.ams.service;
+
+import com.example.ams.model.Article;
+import com.example.ams.model.Pagination;
+import com.example.ams.model.schema.AddedArticle;
+import com.example.ams.model.schema.UpdatedArticle;
+import java.util.List;
+
+public interface ArticleService {
+    Boolean addArticle(AddedArticle article);
+    Boolean updateArticle(UpdatedArticle article);
+    Boolean deleteArticle(int id);
+    List<Article> getAllArticles(int page, int limit);
+    Pagination getPagination(int page, int limit);
+    Article getArticleByID(int id);
+    List<Article> getArticlesByCategory(int categoryID, int page, int limit);
+    Pagination getPaginationByCategory(int categoryID, int page, int limit);
+}
+```
+
+
 
