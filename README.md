@@ -1,5 +1,5 @@
-# Spring Article Management System Tutorial
-AMS API and Application Demo 
+# Article Management System Tutorial
+Spring Framework - AMS API and Application Demo 
 
 ## Prerequisite
 Before getting into the tutorial, please make sure you have the following requirements
