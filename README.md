@@ -1179,4 +1179,160 @@ public class SwaggerConfiguration {
 
 As we will custom the swagger ui, now download the swagger ui from https://github.com/swagger-api/swagger-ui/tree/2.x/
 
+Anyway, as we will use Thymeleaf as our template engine, now let's add thymeleaf dependency in _pom.xml_ file 
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-thymeleaf</artifactId>
+</dependency>
+```
+After that, add these properties to __application.properties__ file:
+
+```
+spring.thymeleaf.cache=false
+spring.thymeleaf.mode=HTML
+```
+
+Under __resources/static__ folder, create new folder "swagger" and then copy all folders and files (except __index.html__ file) from __dist__ folder in swagger ui downloaded folder above to this __swagger__ folder.
+
+Under __resources/templates__, create new folder "swagger" and then copy __index.html__ file from __dist__ folder in swagger ui downloaded folder above to this __swagger__ folder.
+
+Now, add and modify code in the __index.html__ as the sample below:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="IE=edge">
+  <title>AMS API</title>
+  <link rel="icon" type="image/png" href="/swagger/images/favicon-32x32.png" sizes="32x32" />
+  <link rel="icon" type="image/png" href="/swagger/images/favicon-16x16.png" sizes="16x16" />
+  <link href='/swagger/css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='/swagger/css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='/swagger/css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
+  <link href='/swagger/css/reset.css' media='print' rel='stylesheet' type='text/css'/>
+  <link href='/swagger/css/print.css' media='print' rel='stylesheet' type='text/css'/>
+  <script src='/swagger/lib/object-assign-pollyfill.js' type='text/javascript'></script>
+  <script src='/swagger/lib/jquery-1.8.0.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/jquery.slideto.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/jquery.wiggle.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/jquery.ba-bbq.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/handlebars-4.0.5.js' type='text/javascript'></script>
+  <script src='/swagger/lib/lodash.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/backbone-min.js' type='text/javascript'></script>
+  <script src='/swagger/swagger-ui.js' type='text/javascript'></script>
+  <script src='/swagger/lib/highlight.9.1.0.pack.js' type='text/javascript'></script>
+  <script src='/swagger/lib/highlight.9.1.0.pack_extended.js' type='text/javascript'></script>
+  <script src='/swagger/lib/jsoneditor.min.js' type='text/javascript'></script>
+  <script src='/swagger/lib/marked.js' type='text/javascript'></script>
+  <script src='/swagger/lib/swagger-oauth.js' type='text/javascript'></script>
+
+  <!-- Some basic translations -->
+  <!-- <script src='lang/translator.js' type='text/javascript'></script> -->
+  <!-- <script src='lang/ru.js' type='text/javascript'></script> -->
+  <!-- <script src='lang/en.js' type='text/javascript'></script> -->
+
+  <script type="text/javascript">
+    $(function () {
+      var url = window.location.search.match(/url=([^&]+)/);
+      if (url && url.length > 1) {
+        url = decodeURIComponent(url[1]);
+      } else {
+        url = "/v2/api-docs";
+      }
+
+      hljs.configure({
+        highlightSizeThreshold: 5000
+      });
+
+      // Pre load translate...
+      if(window.SwaggerTranslator) {
+        window.SwaggerTranslator.translate();
+      }
+      window.swaggerUi = new SwaggerUi({
+        url: url,
+        dom_id: "swagger-ui-container",
+        supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+        onComplete: function(swaggerApi, swaggerUi){
+          if(typeof initOAuth == "function") {
+            initOAuth({
+              clientId: "your-client-id",
+              clientSecret: "your-client-secret-if-required",
+              realm: "your-realms",
+              appName: "your-app-name",
+              scopeSeparator: " ",
+              additionalQueryStringParams: {}
+            });
+          }
+
+          if(window.SwaggerTranslator) {
+            window.SwaggerTranslator.translate();
+          }
+
+          addApiKeyAuthorization();
+        },
+        onFailure: function(data) {
+          log("Unable to Load SwaggerUI");
+        },
+        docExpansion: "none",
+        jsonEditor: false,
+        defaultModelRendering: 'schema',
+        showRequestHeaders: false,
+        showOperationIds: false
+      });
+
+      function addApiKeyAuthorization(){
+        var key = "Basic YXBpdXNlcjphcGlAMTIzNA=="; //encodeURIComponent($('#input_apiKey')[0].value);
+        if(key && key.trim() != "") {
+          var apiKeyAuth = new SwaggerClient.ApiKeyAuthorization("Authorization", key, "header");
+          window.swaggerUi.api.clientAuthorizations.add("api_key", apiKeyAuth);
+          log("added key " + key);
+        }
+      }
+
+      $('#input_apiKey').change(addApiKeyAuthorization);
+
+      window.swaggerUi.load();
+
+      function log() {
+        if ('console' in window) {
+          console.log.apply(console, arguments);
+        }
+      }
+  });
+  </script>
+</head>
+
+<body class="swagger-section">
+<div id='header'>
+  <div class="swagger-ui-wrap">
+    <a id="logo" href="http://swagger.io"><img class="logo__img" alt="swagger" height="30" width="30" src="/swagger/images/article_symbol.png" /><span class="logo__title">AMS API</span></a>
+    <form id='api_selector'>
+      <div class='input'><input placeholder="http://example.com/api" id="input_baseUrl" name="baseUrl" type="hidden"/></div>
+      <div class='input'><input placeholder="api_key" id="input_apiKey" name="apiKey" type="text" value="Basic YXBpdXNlcjphcGlAMTIzNA=="/></div>
+    </form>
+  </div>
+</div>
+
+<div id="message-bar" class="swagger-ui-wrap" data-sw-translate>&nbsp;</div>
+<div id="swagger-ui-container" class="swagger-ui-wrap"></div>
+</body>
+</html>
+```
+
+Now all is done for Swagger configuration. 
+
+**Attention**
+pleas add this property to __application.properties__ to fix the timezone issue with timestamp datatype
+
+```
+spring.jackson.time-zone=Asia/Seoul
+```
+--> For Cambodia: Asia/Phnom_Penh
+
+
+
+
 
