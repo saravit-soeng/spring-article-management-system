@@ -253,6 +253,7 @@ public class Article {
 }
 ```
 - __Pagination__
+
 ```java
 package com.example.ams.model;
 
@@ -1063,5 +1064,119 @@ public class FileUploadRestController {
 
 If you are here, you have created AMS API. 👏👏👏
 
+## Configure Basic Security for API
+
+In this tutorial, I just created the basic in-memory authentication.
+
+First, you add security dependency in _pom.xml_ file.
+
+```xml
+<dependency>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-security</artifactId>
+</dependency>
+```
+
+Now let's create __APISecurityConfiguration__ class in __configuration__ package:
+
+```java
+package com.example.ams.configuration;
+
+import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+
+@Configuration
+public class APISecurityConfiguration extends WebSecurityConfigurerAdapter{
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication()
+                .withUser("apiuser")
+                .password("{noop}api@1234") // {noop} is the password encryption pattern in new version of Spring Boot
+                .roles("API");
+    }
+
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http.httpBasic();
+        http.csrf().disable();
+
+        http.sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
+        http.authorizeRequests()
+                .antMatchers("/api/**", "/api-docs").hasRole("API");
+    }
+}
+```
+
+## Create API Document with Swagger
+
+In this example, i used Swagger v2. Now, let's add swagger dependcy to _pom.xml_ file:
+
+```xml
+<dependency>
+    <groupId>io.springfox</groupId>
+    <artifactId>springfox-swagger2</artifactId>
+    <version>2.4.0</version>
+</dependency>
+```
+
+Under __configuration__ -> create __SwaggerConfiguration__ class:
+
+```java
+package com.example.ams.configuration;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import springfox.documentation.builders.PathSelectors;
+import springfox.documentation.builders.RequestHandlerSelectors;
+import springfox.documentation.service.ApiInfo;
+import springfox.documentation.spi.DocumentationType;
+import springfox.documentation.spring.web.plugins.Docket;
+import springfox.documentation.swagger2.annotations.EnableSwagger2;
+
+@Configuration
+@EnableSwagger2
+public class SwaggerConfiguration {
+
+    @Bean
+    public Docket docket(){
+        return new Docket(DocumentationType.SWAGGER_2)
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.example.ams.controller.restapi"))
+                .paths(PathSelectors.any())
+                .build()
+                .apiInfo(this.apiInfo());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Bean
+    public ApiInfo apiInfo(){
+        return new ApiInfo("AMS API Documentation",
+                "API for Article Management",
+                "1.0",
+                "http://www.example.com",
+                "XYZ",
+                "http://www.example.com",
+                "http://www.example.com");
+    }
+
+    @Configuration
+    public static class SwaggerCofig implements WebMvcConfigurer{
+        @Override
+        public void addViewControllers(ViewControllerRegistry registry) {
+            registry.addViewController("/api-docs").setViewName("swagger/index");
+        }
+    }
+}
+```
+
+As we will custom the swagger ui, now download the swagger ui from https://github.com/swagger-api/swagger-ui/tree/2.x/
 
 
