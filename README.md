@@ -1330,7 +1330,7 @@ please add this property to __application.properties__ to fix the timezone issue
 ```
 spring.jackson.time-zone=Asia/Seoul
 ```
---> For Cambodia: Asia/Phnom_Penh
+==> For Cambodia: Asia/Phnom_Penh
 
 
 
