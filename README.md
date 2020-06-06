@@ -1324,8 +1324,8 @@ Now, add and modify code in the __index.html__ as the sample below:
 
 Now all is done for Swagger configuration. 
 
-**Attention**
-pleas add this property to __application.properties__ to fix the timezone issue with timestamp datatype
+**Attention:**
+please add this property to __application.properties__ to fix the timezone issue with timestamp datatype
 
 ```
 spring.jackson.time-zone=Asia/Seoul
