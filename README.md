@@ -1,4 +1,4 @@
-# Article Management System Tutorial
+# Article Management System
 Spring Framework - Article Management System (AMS) API and Application 
 
 ## Prerequisite
@@ -470,7 +470,126 @@ public class CategoryController {
 
 - __Article REST Endpoint__
 
-Steps and Flow are the same as Category endpoint, now let's create Article Endpoint:
+Before getting further, create two more models for RequestBody in Model Schema. Under __model__ package -> create new package -> name it to "schema"
+
+- AddedArticle
+
+```java
+package com.example.ams.model.schema;
+
+public class AddedArticle {
+    private String title;
+    private String description;
+    private String thumbnail;
+    private int category_id;
+    private String author;
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public int getCategory_id() {
+        return category_id;
+    }
+
+    public void setCategory_id(int category_id) {
+        this.category_id = category_id;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+}
+```
+
+- UpdatedArticle
+
+```java
+package com.example.ams.model.schema;
+
+public class UpdatedArticle {
+    private int id;
+    private String title;
+    private String description;
+    private String thumbnail;
+    private int category_id;
+    private String author;
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getThumbnail() {
+        return thumbnail;
+    }
+
+    public void setThumbnail(String thumbnail) {
+        this.thumbnail = thumbnail;
+    }
+
+    public int getCategory_id() {
+        return category_id;
+    }
+
+    public void setCategory_id(int category_id) {
+        this.category_id = category_id;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public void setAuthor(String author) {
+        this.author = author;
+    }
+}
+```
+
+Now let's create Article Endpoint, steps and flow are the same as Category endpoint:
 
 Under __repository__ -> create ArticleRepo
 
@@ -571,6 +690,378 @@ public interface ArticleService {
     Pagination getPaginationByCategory(int categoryID, int page, int limit);
 }
 ```
+
+Under __service__ -> __impl__ -> create ArticleServiceImpl class
+
+```java
+package com.example.ams.service.impl;
+
+import com.example.ams.model.Article;
+import com.example.ams.model.Pagination;
+import com.example.ams.model.schema.AddedArticle;
+import com.example.ams.model.schema.UpdatedArticle;
+import com.example.ams.repository.ArticleRepo;
+import com.example.ams.service.ArticleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import java.util.List;
+
+@Service
+public class ArticleServiceImpl implements ArticleService {
+
+    @Autowired
+    private ArticleRepo articleRepo;
+
+    @Override
+    public Boolean addArticle(AddedArticle article) {
+        return articleRepo.addArticle(article);
+    }
+
+    @Override
+    public Boolean updateArticle(UpdatedArticle article) {
+        return articleRepo.updateArticle(article);
+    }
+
+    @Override
+    public Boolean deleteArticle(int id) {
+        return articleRepo.deleteArticle(id);
+    }
+
+    @Override
+    public List<Article> getAllArticles(int page, int limit) {
+        int offset = (page - 1) * limit;
+        return articleRepo.getAllArticles(offset, limit);
+    }
+
+    @Override
+    public Pagination getPagination(int page, int limit) {
+        Pagination pagination = new Pagination();
+        pagination.setPage(page);
+        pagination.setLimit(limit);
+        int totalRecords = articleRepo.countAllArticles();
+        pagination.setTotalRecord(totalRecords);
+        int totalPage = (int) Math.ceil( (double)totalRecords / limit);
+        pagination.setTotalPage(totalPage);
+        return pagination;
+    }
+
+    @Override
+    public Article getArticleByID(int id) {
+        return articleRepo.getArticleByID(id);
+    }
+
+    @Override
+    public List<Article> getArticlesByCategory(int categoryID, int page, int limit) {
+        int offset = (page - 1) * limit;
+        return articleRepo.getArticlesByCategory(categoryID, offset, limit);
+    }
+
+    @Override
+    public Pagination getPaginationByCategory(int categoryID, int page, int limit) {
+        Pagination pagination = new Pagination();
+        pagination.setPage(page);
+        pagination.setLimit(limit);
+        int totalRecords = articleRepo.countArticleByCategory(categoryID);
+        pagination.setTotalRecord(totalRecords);
+        int totalPage = (int) Math.ceil( (double)totalRecords / limit);
+        pagination.setTotalPage(totalPage);
+        return pagination;
+    }
+}
+```
+
+Under __controller__ -> __restapi__ -> create ArticleController class
+
+```java
+package com.example.ams.controller.restapi;
+
+import com.example.ams.model.Article;
+import com.example.ams.model.Pagination;
+import com.example.ams.model.schema.AddedArticle;
+import com.example.ams.model.schema.UpdatedArticle;
+import com.example.ams.service.ArticleService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class ArticleController {
+
+    @Autowired
+    private ArticleService articleService;
+
+    @PostMapping("/article")
+    public ResponseEntity<Map<String,Object>> addArticle(@RequestBody AddedArticle article){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean isAdded = articleService.addArticle(article);
+            if(isAdded){
+                map.put("message", "success");
+                map.put("status", true);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @PutMapping("/article")
+    public ResponseEntity<Map<String,Object>> updateArticle(@RequestBody UpdatedArticle article){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean isUpdated = articleService.updateArticle(article);
+            if(isUpdated){
+                map.put("message", "success");
+                map.put("status", true);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @DeleteMapping("/article/{id}")
+    public ResponseEntity<Map<String,Object>> updateArticle(@PathVariable("id") int id){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            boolean isUpdated = articleService.deleteArticle(id);
+            if(isUpdated){
+                map.put("message", "success");
+                map.put("status", true);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @GetMapping("/article")
+    public ResponseEntity<Map<String,Object>> getArticles(@RequestParam(value = "page", defaultValue = "1", required = false) int page, @RequestParam(value = "limit", defaultValue = "15", required = false) int limit){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            List<Article> articles = articleService.getAllArticles(page, limit);
+            Pagination pagination = articleService.getPagination(page, limit);
+            if(articles != null){
+                map.put("message", "success");
+                map.put("status", true);
+                map.put("pagination", pagination);
+                map.put("data", articles);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @GetMapping("/article/{id}")
+    public ResponseEntity<Map<String,Object>> getArticles(@PathVariable("id") int id){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            Article article = articleService.getArticleByID(id);
+            if(article != null){
+                map.put("message", "success");
+                map.put("status", true);
+                map.put("data", article);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+
+    @GetMapping("/article-by-category/{category_id}")
+    public ResponseEntity<Map<String,Object>> getArticlesByCategory(@PathVariable("category_id") int categoryID ,@RequestParam(value = "page", defaultValue = "1", required = false) int page, @RequestParam(value = "limit", defaultValue = "15", required = false) int limit){
+        Map<String, Object> map = new HashMap<>();
+        try {
+            List<Article> articles = articleService.getArticlesByCategory(categoryID, page, limit);
+            Pagination pagination = articleService.getPaginationByCategory(categoryID, page, limit);
+            if(articles != null){
+                map.put("message", "success");
+                map.put("status", true);
+                map.put("pagination", pagination);
+                map.put("data", articles);
+            }else {
+                map.put("message", "fail");
+                map.put("status", false);
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+            map.put("message", "error");
+            map.put("status", false);
+        }
+
+        return new ResponseEntity<>(map, HttpStatus.OK);
+    }
+}
+```
+
+Now you have created REST API endpoint for article. 
+
+- __Create File Upload REST Endpoint__
+
+In __application.properties__, add new properties for path configuration.
+
+```
+file.upload.server.path=C:/Users/Saravit/Documents/upload/
+file.upload.client.path=/image/
+url.path=http://localhost:8080
+```
+
+Create __FileUploadConfiguration__ class in __configuration__ package
+
+```java
+package com.example.ams.configuration;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+@Configuration
+public class FileUploadConfiguration implements WebMvcConfigurer {
+
+    @Value("${file.upload.client.path}")
+    private String clientPath;
+
+    @Value("${file.upload.server.path}")
+    private String serverPath;
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        registry.addResourceHandler(clientPath + "**").addResourceLocations("file:"+serverPath);
+    }
+}
+```
+
+Under __service__ -> create __FileUploadService__ interface
+
+```java
+package com.example.ams.service;
+
+import org.springframework.web.multipart.MultipartFile;
+
+public interface FileUploadService {
+    String upload(MultipartFile file);
+}
+```
+
+Under __service__ -> __impl__ -> create __FileUploadServiceImpl__ class
+
+```java
+package com.example.ams.service.impl;
+
+import com.example.ams.service.FileUploadService;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.UUID;
+
+@Service
+public class FileUploadServiceImpl implements FileUploadService {
+
+    @Value("${file.upload.client.path}")
+    private String clientPath;
+
+    @Value("${file.upload.server.path}")
+    private String serverPath;
+
+    @Override
+    public String upload(MultipartFile file) {
+        if (file == null) {
+            return null;
+        }
+
+        File path = new File(this.serverPath);
+        if(!path.exists()) path.mkdirs();
+
+        String filename = file.getOriginalFilename();
+        filename = UUID.randomUUID() + "." + filename.substring(filename.lastIndexOf(".")+1);
+
+        try{
+            Files.copy(file.getInputStream(), Paths.get(this.serverPath, filename));
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+
+        return  this.clientPath + filename;
+    }
+}
+```
+
+Under __controller__ -> __restapi__ -> create __FileUploadRestController__ class
+
+```java
+package com.example.ams.controller.restapi;
+
+import com.example.ams.service.FileUploadService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+import java.util.HashMap;
+import java.util.Map;
+
+@RestController
+@RequestMapping("/api")
+public class FileUploadRestController {
+
+    @Value("${url.path}")
+    private String urlPath;
+
+    @Autowired
+    private FileUploadService fileUploadService;
+
+    @PostMapping("/upload")
+    public Map<String, Object> uploadImage(MultipartFile file){
+        Map<String, Object> map = new HashMap<>();
+        map.put("message", "upload success");
+        map.put("data", urlPath + fileUploadService.upload(file));
+        return map;
+    }
+}
+```
+
+If you are here, you have created AMS API. 👏👏👏
 
 
 
