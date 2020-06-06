@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface CategoryRepo {
 
-    @Select("SELECT * from category ORDER BY id")
+    @Select("SELECT * FROM category ORDER BY id")
     List<Category> getAllCategories();
 
     @Insert("INSERT INTO category(name) VALUES(#{name})")

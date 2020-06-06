@@ -32,7 +32,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");
@@ -54,7 +53,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");
@@ -76,7 +74,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");
@@ -101,7 +98,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");
@@ -124,7 +120,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");
@@ -149,7 +144,6 @@ public class ArticleController {
                 map.put("message", "fail");
                 map.put("status", false);
             }
-
         }catch (Exception e){
             e.printStackTrace();
             map.put("message", "error");

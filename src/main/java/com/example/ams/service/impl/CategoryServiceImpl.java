@@ -5,7 +5,6 @@ import com.example.ams.repository.CategoryRepo;
 import com.example.ams.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service

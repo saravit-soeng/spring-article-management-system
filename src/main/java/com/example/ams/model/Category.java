@@ -1,7 +1,5 @@
 package com.example.ams.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 public class Category {
 
     private int id;

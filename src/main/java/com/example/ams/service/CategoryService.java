@@ -1,8 +1,6 @@
 package com.example.ams.service;
 
-
 import com.example.ams.model.Category;
-
 import java.util.List;
 
 public interface CategoryService {
