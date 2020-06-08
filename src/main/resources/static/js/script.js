@@ -1,6 +1,7 @@
 "use strict";
 
 var updatedArticle = null;
+var articles = null;
 
 $(document).ready(function () {
     getArticles();
@@ -71,33 +72,18 @@ function showEditedArticle(id) {
             $('#category-update').empty();
             $('#category-update').append(element);
 
-            getArticle(id, function (article) {
-                $('#title-update').val(article.title);
-                $('#category-update').val(article.category.id);
-                $('#author-update').val(article.author);
-                $('#description-update').val(article.description);
+            let filterArticle = articles.filter(function (article) {
+                return article.id === id;
+            });
 
-                // Store updated article for id and thumbnail
-                updatedArticle = article;
-            })
+            updatedArticle = filterArticle[0];
+
+            $('#title-update').val(updatedArticle.title);
+            $('#category-update').val(updatedArticle.category.id);
+            $('#author-update').val(updatedArticle.author);
+            $('#description-update').val(updatedArticle.description);
         },
         error: function (err) {
-            console.log(err);
-        }
-    });
-}
-
-function getArticle(id, callback) {
-    $.ajax({
-        url:"/api/article/"+id,
-        type:"GET",
-        headers:{
-            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
-        },
-        success:function (response) {
-            callback(response.data);
-        },
-        error:function (err) {
             console.log(err);
         }
     });
@@ -120,28 +106,18 @@ function deleteArticle(id) {
 }
 
 function viewArticle(id) {
-    $.ajax({
-        url:"/api/article/"+id,
-        type:"GET",
-        headers:{
-            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
-        },
-        success:function (response) {
-            $('#detail-view').empty();
-            let article = response.data;
-            let date = new Date(article.created_date);
-            $('#title-view').text(article.title);
-            let detail = '<img src="'+article.thumbnail+'" style="width: 470px;height: 300px"/>';
-            detail += '<p>'+date.toLocaleString()+'</p>';
-            detail += article.description;
-            detail += '<br/><br/><p>Written by: <strong>'+article.author+'</strong></p>';
-            $('#detail-view').append(detail);
-
-        },
-        error:function (err) {
-            console.log(err);
-        }
-    })
+    $('#detail-view').empty();
+    let filterArticle = articles.filter(function (article) {
+        return article.id === id;
+    });
+    const article = filterArticle[0];
+    let date = new Date(article.created_date);
+    $('#title-view').text(article.title);
+    let detail = '<img src="'+article.thumbnail+'" style="width: 470px;height: 300px"/>';
+    detail += '<p>'+date.toLocaleString()+'</p>';
+    detail += article.description;
+    detail += '<br/><br/><p>Written by: <strong>'+article.author+'</strong></p>';
+    $('#detail-view').append(detail);
 }
 
 function addArticle(thumbnail) {
@@ -181,7 +157,7 @@ function getArticles() {
         },
         success: function (response) {
             $('#article-list').empty();
-            let articles = response.data;
+            articles = response.data;
             let table = '<table class="table"><thead><th>Title</th><th>Category</th><th>Author</th><th>Thumbnail</th><th>Action</th></thead><tbody>';
             articles.forEach(function (article) {
                 table += '<tr><td>'+article.title+'</td><td>'+article.category.name+'</td><td>'+article.author+'</td><td><img src="'+article.thumbnail+
