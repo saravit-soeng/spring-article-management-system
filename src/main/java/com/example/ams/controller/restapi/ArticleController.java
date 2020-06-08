@@ -66,8 +66,8 @@ public class ArticleController {
     public ResponseEntity<Map<String,Object>> updateArticle(@PathVariable("id") int id){
         Map<String, Object> map = new HashMap<>();
         try {
-            boolean isUpdated = articleService.deleteArticle(id);
-            if(isUpdated){
+            boolean isDeleted = articleService.deleteArticle(id);
+            if(isDeleted){
                 map.put("message", "success");
                 map.put("status", true);
             }else {
