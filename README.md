@@ -5,7 +5,7 @@ Spring Framework - Article Management System (AMS) API and Application
 Before getting into the tutorial, please make sure you have the following requirements on your computer:
 - Installing Java Version 8 or later
 - IDE: IntelliJ or Spring Tool Suite (This tutorial using IntelliJ)
-- Database: PostgreSQL on local or Server (Backup the database file that is located in folder _src/main/resources/database_)
+- Database: PostgreSQL version 9.6.18 or later on local or Server (Backup the database file that is located in folder _src/main/resources/database_)
 
 ## Create Spring Boot Project
 - Open IntelliJ IDE and you will see screen as below, after that choose __Create New Project__
