@@ -1332,7 +1332,391 @@ spring.jackson.time-zone=Asia/Seoul
 ```
 ==> For Cambodia: Asia/Phnom_Penh
 
+## Create demo application to test API
+
+In this demo, I will use the jQuery & Ajax to request to API that we have created and using thymeleaf as template engine for view. Anyway, to understand about the demo application, you can clone or download the project to test in advanced.
+
+Under __templates__ folder, create new html file -> index.html
+
+```html
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Article Management System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css" integrity="sha384-9aIt2nRpC12Uk9gS9baDl411NQApFmC26EwAOH8WgZl5MYYxFfc+NcPb1dKGj7Sk" crossorigin="anonymous">
+    <link rel="stylesheet" type="text/css" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="navbar navbar-light bg-light">
+            <span class="navbar-brand mb-0 h1">Article Management System</span>
+        </nav>
+        <div style="margin-top: 10px; margin-bottom: 10px">
+            <button class="btn btn-success" data-toggle="modal" data-target="#addArticleModal" onclick="getCategories()">Add New Article</button>
+        </div>
+        <div id="article-list"></div>
+    </div>
+
+    <!-- Add New Article Modal -->
+    <div class="modal fade" id="addArticleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel">Add New Article</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="title" placeholder="enter title of article">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select class="form-control" id="category"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="author">Author</label>
+                            <input type="text" class="form-control" id="author" placeholder="enter author name">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description" rows="3"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <label for="thumbnail">Thumbnail</label>
+                            <input type="file" class="form-control-file" id="thumbnail">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="save-article" data-dismiss="modal">Save Article</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Update Article Modal -->
+    <div class="modal fade" id="updateArticleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel1" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabel1">Update Article</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="title">Title</label>
+                            <input type="text" class="form-control" id="title-update" placeholder="enter title of article">
+                        </div>
+                        <div class="form-group">
+                            <label for="category">Category</label>
+                            <select class="form-control" id="category-update"></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="author">Author</label>
+                            <input type="text" class="form-control" id="author-update" placeholder="enter author name">
+                        </div>
+                        <div class="form-group">
+                            <label for="description">Description</label>
+                            <textarea class="form-control" id="description-update" rows="3"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" id="update-article" data-dismiss="modal">Update Article</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Article Modal -->
+    <div class="modal fade" id="viewArticleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="title-view"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="detail-view"></div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/js/bootstrap.min.js" integrity="sha384-OgVRvuATP1z7JjHLkuOU7Xw704+h835Lr+6QL9UvYjZE3Ipu6Tp75j7Bh/kR0JKI" crossorigin="anonymous"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
+```
+
+Now, under __static__ folder, create a new folder "js" -> create a javascript file -> script.js
+
+```javascript
+"use strict";
+
+var updatedArticle = null;
+
+$(document).ready(function () {
+    getArticles();
+
+    $('#save-article').click(function () {
+        let data = $('#thumbnail')[0].files[0];
+        let formData = new FormData();
+        formData.append("file", data);
+        $.ajax({
+            url: '/api/upload',
+            type: 'POST',
+            enctype: 'multipart/form-data',
+            contentType: false,
+            processData: false,
+            data: formData,
+            success:function (response) {
+                addArticle(response.data)
+            },
+            error: function (err) {
+                console.log(err);
+            }
+
+        });
+    });
+
+    $('#update-article').click(function () {
+        let updatedData = {
+            id: updatedArticle.id,
+            title: $('#title-update').val(),
+            description: $('#description-update').val(),
+            author: $('#author-update').val(),
+            thumbnail: updatedArticle.thumbnail,
+            category_id: parseInt($('#category-update').val())
+        }
+        $.ajax({
+            url:"/api/article",
+            type:"PUT",
+            contentType: 'application/json',
+            headers:{
+                authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+            },
+            data: JSON.stringify(updatedData),
+            success:function (response) {
+                console.log(response.message);
+                getArticles();
+            },
+            error:function (err) {
+                console.log(err);
+            }
+        });
+    });
+});
 
 
+function showEditedArticle(id) {
+    $.ajax({
+        url:"/api/category",
+        type:"GET",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success: function (response) {
+            let categories = response.data;
+            let element = '';
+            categories.forEach(function (category) {
+                element += '<option value="'+category.id+'">'+category.name+'</option>'
+            })
+            $('#category-update').empty();
+            $('#category-update').append(element);
 
+            getArticle(id, function (article) {
+                $('#title-update').val(article.title);
+                $('#category-update').val(article.category.id);
+                $('#author-update').val(article.author);
+                $('#description-update').val(article.description);
 
+                // Store updated article for id and thumbnail
+                updatedArticle = article;
+            })
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function getArticle(id, callback) {
+    $.ajax({
+        url:"/api/article/"+id,
+        type:"GET",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success:function (response) {
+            callback(response.data);
+        },
+        error:function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function deleteArticle(id) {
+    $.ajax({
+        url:"/api/article/"+id,
+        type:"DELETE",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success:function (response) {
+            getArticles();
+        },
+        error:function (err) {
+            console.log(err);
+        }
+    })
+}
+
+function viewArticle(id) {
+    $.ajax({
+        url:"/api/article/"+id,
+        type:"GET",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success:function (response) {
+            $('#detail-view').empty();
+            let article = response.data;
+            let date = new Date(article.created_date);
+            $('#title-view').text(article.title);
+            let detail = '<img src="'+article.thumbnail+'" style="width: 470px;height: 300px"/>';
+            detail += '<p>'+date.toLocaleString()+'</p>';
+            detail += article.description;
+            detail += '<br/><br/><p>Written by: <strong>'+article.author+'</strong></p>';
+            $('#detail-view').append(detail);
+
+        },
+        error:function (err) {
+            console.log(err);
+        }
+    })
+}
+
+function addArticle(thumbnail) {
+    let data = {
+        title: $('#title').val(),
+        description: $('#description').val(),
+        author: $('#author').val(),
+        thumbnail: thumbnail,
+        category_id: parseInt($('#category').val())
+    }
+    console.log(data);
+    $.ajax({
+        url:"/api/article",
+        type:"POST",
+        contentType: 'application/json',
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        data: JSON.stringify(data),
+        success:function (response) {
+            console.log(response.message);
+            getArticles();
+            clearControls();
+        },
+        error:function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function getArticles() {
+    $.ajax({
+        url:"/api/article?page=1&limit=30",
+        type:"GET",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success: function (response) {
+            $('#article-list').empty();
+            let articles = response.data;
+            let table = '<table class="table"><thead><th>Title</th><th>Category</th><th>Author</th><th>Thumbnail</th><th>Action</th></thead><tbody>';
+            articles.forEach(function (article) {
+                table += '<tr><td>'+article.title+'</td><td>'+article.category.name+'</td><td>'+article.author+'</td><td><img src="'+article.thumbnail+
+                    '" width="50px" height="40px"></td><td>'+
+                    '<button class="btn btn-info" data-toggle="modal" data-target="#viewArticleModal" onclick="viewArticle('+article.id+')"><i class="fa fa-eye" aria-hidden="true"></i></button> '+
+                    '<button class="btn btn-primary" data-toggle="modal" data-target="#updateArticleModal" onclick="showEditedArticle('+article.id+')"><i class="fa fa-edit" aria-hidden="true"></i></button> '+
+                    '<button class="btn btn-danger" onclick="deleteArticle('+article.id+')"><i class="fa fa-trash" aria-hidden="true"></i></button></td></tr>';
+            })
+            table += '</tbody></table>';
+            $('#article-list').append(table);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function getCategories() {
+    $.ajax({
+        url:"/api/category",
+        type:"GET",
+        headers:{
+            authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+        },
+        success: function (response) {
+            let categories = response.data;
+            let element = '<option selected="true" disabled="disabled" value="0">Choose Category</option>';
+            categories.forEach(function (category) {
+                element += '<option value="'+category.id+'">'+category.name+'</option>'
+            })
+            $('#category').empty();
+            $('#category').append(element);
+        },
+        error: function (err) {
+            console.log(err);
+        }
+    });
+}
+
+function clearControls() {
+    $('#title').val("");
+    $('#description').val("");
+    $('#author').val("");
+    $('#thumbnail').val("");
+    $('#category').val(0);
+}
+```
+
+In __controller__ package create a new java class -> HomeController
+
+```java
+package com.example.ams.controller;
+
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/")
+public class HomeController {
+
+    @GetMapping(value = {"/", "index"})
+    public String homePage(){
+        return "index";
+    }
+}
+```
+
+__All is done. Enjoy coding!__ 😍😍😍
