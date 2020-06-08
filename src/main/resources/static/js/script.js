@@ -63,8 +63,7 @@ function showEditedArticle(id) {
             authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
         },
         success: function (response) {
-            let json = JSON.stringify(response.data);
-            let categories = JSON.parse(json);
+            let categories = response.data;
             let element = '';
             categories.forEach(function (category) {
                 element += '<option value="'+category.id+'">'+category.name+'</option>'
@@ -96,7 +95,7 @@ function getArticle(id, callback) {
             authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
         },
         success:function (response) {
-            callback(JSON.parse(JSON.stringify(response.data)));
+            callback(response.data);
         },
         error:function (err) {
             console.log(err);
@@ -129,8 +128,7 @@ function viewArticle(id) {
         },
         success:function (response) {
             $('#detail-view').empty();
-            let json = JSON.stringify(response.data);
-            let article = JSON.parse(json);
+            let article = response.data;
             let date = new Date(article.created_date);
             $('#title-view').text(article.title);
             let detail = '<img src="'+article.thumbnail+'" style="width: 470px;height: 300px"/>';
@@ -163,9 +161,10 @@ function addArticle(thumbnail) {
             authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
         },
         data: JSON.stringify(data),
-        success:function () {
-            console.log("Add success!")
+        success:function (response) {
+            console.log(response.message);
             getArticles();
+            clearControls();
         },
         error:function (err) {
             console.log(err);
@@ -182,8 +181,7 @@ function getArticles() {
         },
         success: function (response) {
             $('#article-list').empty();
-            let json = JSON.stringify(response.data);
-            let articles = JSON.parse(json);
+            let articles = response.data;
             let table = '<table class="table"><thead><th>Title</th><th>Category</th><th>Author</th><th>Thumbnail</th><th>Action</th></thead><tbody>';
             articles.forEach(function (article) {
                 table += '<tr><td>'+article.title+'</td><td>'+article.category.name+'</td><td>'+article.author+'</td><td><img src="'+article.thumbnail+
@@ -209,9 +207,8 @@ function getCategories() {
             authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
         },
         success: function (response) {
-            let json = JSON.stringify(response.data);
-            let categories = JSON.parse(json);
-            let element = '<option selected="true" disabled="disabled">Choose Category</option>';
+            let categories = response.data;
+            let element = '<option selected="true" disabled="disabled" value="0">Choose Category</option>';
             categories.forEach(function (category) {
                 element += '<option value="'+category.id+'">'+category.name+'</option>'
             })
@@ -222,4 +219,12 @@ function getCategories() {
             console.log(err);
         }
     });
+}
+
+function clearControls() {
+    $('#title').val("");
+    $('#description').val("");
+    $('#author').val("");
+    $('#thumbnail').val("");
+    $('#category').val(0);
 }
