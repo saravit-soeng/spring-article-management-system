@@ -1334,7 +1334,7 @@ spring.jackson.time-zone=Asia/Seoul
 
 ## Create demo application to test API
 
-In this demo, I will use the jQuery & Ajax to request to API that we have created and using thymeleaf as template engine for view.
+In this demo, I will use the jQuery & Ajax to request to API that we have created and using thymeleaf as template engine for view. Anyway, to understand about the demo application, you can clone or download the project to test in advanced.
 
 Under __templates__ folder, create new html file -> index.html
 
@@ -1719,4 +1719,4 @@ public class HomeController {
 }
 ```
 
-You can now test the applicaton. 😍😍😍
+__All is done. Enjoy coding!__ 😍😍😍
