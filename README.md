@@ -1462,6 +1462,7 @@ Under __templates__ folder, create new html file -> index.html
     <script src="js/script.js"></script>
 </body>
 </html>
+```
 
 Now, under __static__ folder, create a new folder "js" -> create a javascript file -> script.js
 
@@ -1696,6 +1697,7 @@ function clearControls() {
     $('#thumbnail').val("");
     $('#category').val(0);
 }
+```
 
 In __controller__ package create a new java class -> HomeController
 
