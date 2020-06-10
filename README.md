@@ -841,7 +841,7 @@ public class ArticleController {
     }
 
     @DeleteMapping("/article/{id}")
-    public ResponseEntity<Map<String,Object>> updateArticle(@PathVariable("id") int id){
+    public ResponseEntity<Map<String,Object>> deleteArticle(@PathVariable("id") int id){
         Map<String, Object> map = new HashMap<>();
         try {
             boolean isDeleted = articleService.deleteArticle(id);
@@ -886,7 +886,7 @@ public class ArticleController {
     }
 
     @GetMapping("/article/{id}")
-    public ResponseEntity<Map<String,Object>> getArticles(@PathVariable("id") int id){
+    public ResponseEntity<Map<String,Object>> getArticle(@PathVariable("id") int id){
         Map<String, Object> map = new HashMap<>();
         try {
             Article article = articleService.getArticleByID(id);
