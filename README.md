@@ -1488,6 +1488,9 @@ $(document).ready(function () {
             contentType: false,
             processData: false,
             data: formData,
+            headers:{
+                authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+            },
             success:function (response) {
                 addArticle(response.data)
             },
