@@ -13,6 +13,9 @@ $(document).ready(function () {
             url: '/api/upload',
             type: 'POST',
             enctype: 'multipart/form-data',
+            headers:{
+                authorization:"Basic YXBpdXNlcjphcGlAMTIzNA=="
+            },
             contentType: false,
             processData: false,
             data: formData,
